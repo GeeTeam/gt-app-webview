@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+    <title>极验验证移动版</title>
+</head>
+<body>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .wrapper {
+        position: relative;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .embed {
+        float: none !important;
+    }
+
+    .wrapper .top {
+        background-color: #eeeeee;
+        padding: 0 8px;
+        height: 45px;
+        z-index: 1;
+        position: relative;
+        text-align: center;
+        border-bottom: 1px solid #a7a7aa;
+        font-weight: 500;
+    }
+
+    .wrapper .title {
+        line-height: 45px;
+    }
+
+    .exit {
+        background-image: url('img/return.png');
+        -moz-background-size: 12px auto;
+        -o-background-size: 12px auto;
+        -webkit-background-size: 12px auto;
+        background-size: 12px auto;
+        width: 12px;
+        height: 22px;
+        display: inline-block;
+        vertical-align: middle;
+        position: absolute;
+        left: 8px;
+        top: 11px;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
+
+    .exit:active {
+        background-image: url('img/return_hover.png');
+    }
+</style>
+<div class="wrapper">
+    <div class="top">
+        <a class="exit" href="javascript:android.gtCloseWindow();"></a>
+        <span class="title">请通过验证</span>
+    </div>
+    <div class="body" id="content">
+        <script>
+            var log = function (str) {
+                var s = document.createElement('div');
+                s.innerHTML = str + '<br/>';
+                document.getElementById('content').appendChild(s);
+            };
+            (function () {
+                var s = document.createElement("script");
+                s.async = true;
+                s.src = "http://api.geetest.com/get.php?" + window.location.href.split('?')[1];
+                document.getElementById("content").appendChild(s);
+            })();
+            window.gt_custom_ajax = function (result, id, message) {
+                log("in ajax")
+                //log(result + id + message)
+                if (window.android && window.android.gtCallBack) {
+                    //log("has android callback")
+                    if (result) {
+                        log("succeed")
+                        try {
+                            var json_gt = JSON.stringify({
+                                geetest_challenge: document.querySelector('input[name=geetest_challenge]').value,
+                                geetest_validate: document.querySelector('input[name=geetest_validate]').value,
+                                geetest_seccode: document.querySelector('input[name=geetest_seccode]').value
+                            })
+                            log(json_gt)
+                        }
+                        catch (e) {
+                            log(e)
+                        }
+
+                        window.android.gtCallBack("1", json_gt, message)
+                    }
+                    else {
+                        window.android.gtCallBack("0", JSON.stringify({
+                            geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
+                        }), message);
+                    }
+                }
+            }
+            window.onGeetestLoaded = function($) {
+                if(typeof $ == 'function') {
+                    var vp = document.getElementById('viewport');
+                    vp.setAttribute('content','width=260,user-scalable=no');
+                }
+            }
+        </script>
+    </div>
+</div>
+</body>
+</html>
