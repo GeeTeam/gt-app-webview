@@ -74,12 +74,12 @@
                 document.getElementById('content').appendChild(s);
             };
             (function () {
-                var s = document.createElement("script");
-                s.async = true;
                 var args = window.location.href.split('?')[1];
                 if (args.indexOf('width') === -1) {
                     log('请加width参数');
                 } else {
+                    var s = document.createElement("script");
+                    s.async = true;
                     s.src = "http://api.geetest.com/get.php?" + args;
                     document.getElementById("content").appendChild(s);
                 }
