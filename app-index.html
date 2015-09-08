@@ -63,7 +63,7 @@
 </style>
 <div class="wrapper">
     <div class="top">
-        <a class="exit" href="javascript:android.gtCloseWindow();"></a>
+        <a class="exit" href="javascript:gtapp.gtCloseWindow();"></a>
         <span class="title">请通过验证</span>
     </div>
     <div class="body" id="content">
@@ -87,8 +87,8 @@
             window.gt_custom_ajax = function (result, id, message) {
                 //log("in ajax")
                 //log(result + id + message)
-                if (window.android && window.android.gtCallBack) {
-                    //log("has android callback")
+                if (window.gtapp && window.gtapp.gtCallBack) {
+                    //log("has gtapp callback")
                     if (result) {
                         //log("succeed")
                         try {
@@ -103,10 +103,10 @@
                             //log(e)
                         }
 
-                        window.android.gtCallBack("1", json_gt, message)
+                        window.gtapp.gtCallBack("1", json_gt, message)
                     }
                     else {
-                        window.android.gtCallBack("0", JSON.stringify({
+                        window.gtapp.gtCallBack("0", JSON.stringify({
                             geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
                         }), message);
                     }
