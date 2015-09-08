@@ -77,7 +77,7 @@
                 var s = document.createElement("script");
                 s.async = true;
                 var args = window.location.href.split('?')[1];
-                if (args.indexOf('windt=') === -1) {
+                if (args.indexOf('width') === -1) {
                     log('请加width参数');
                 } else {
                     s.src = "http://api.geetest.com/get.php?" + args;
