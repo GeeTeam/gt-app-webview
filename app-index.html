@@ -60,6 +60,13 @@
     .exit:active {
         background-image: url('img/return_hover.png');
     }
+    #log {
+        padding: 10px;
+    }
+    #log>p {
+        margin: 5px 0;
+        word-break: break-all;
+    }
 </style>
 <div class="wrapper">
     <div class="top">
@@ -67,59 +74,63 @@
         <span class="title">请通过验证</span>
     </div>
     <div class="body" id="content">
-        <script>
-            var log = function (str) {
-                var s = document.createElement('div');
-                s.innerHTML = str + '<br/>';
-                document.getElementById('content').appendChild(s);
-            };
-            (function () {
-                var args = window.location.href.split('?')[1];
-                if (args.indexOf('width') === -1) {
-                    log('请加width参数');
-                } else {
-                    var s = document.createElement("script");
-                    s.async = true;
-                    s.src = "http://api.geetest.com/get.php?" + args;
-                    document.getElementById("content").appendChild(s);
-                }
-            }());
-            window.gt_custom_ajax = function (result, id, message) {
-                //log("in ajax")
-                //log(result + id + message)
-                if (window.gtapp && window.gtapp.gtCallBack) {
-                    //log("has gtapp callback")
-                    if (result) {
-                        //log("succeed")
-                        try {
-                            var json_gt = JSON.stringify({
-                                geetest_challenge: document.querySelector('input[name=geetest_challenge]').value,
-                                geetest_validate: document.querySelector('input[name=geetest_validate]').value,
-                                geetest_seccode: document.querySelector('input[name=geetest_seccode]').value
-                            })
-                            //log(json_gt)
-                        }
-                        catch (e) {
-                            //log(e)
-                        }
-
-                        window.gtapp.gtCallBack("1", json_gt, message)
-                    }
-                    else {
-                        window.gtapp.gtCallBack("0", JSON.stringify({
-                            geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
-                        }), message);
-                    }
-                }
-            }
-            window.onGeetestLoaded = function($) {
-                if(typeof $ == 'function') {
-                    var vp = document.getElementById('viewport');
-                    vp.setAttribute('content','width=260,user-scalable=no');
-                }
-            }
-        </script>
     </div>
+    <div id="log"></div>
 </div>
+<script src="http://api.geetest.com/get.php?callback=init"></script>
+<script>
+    var debug = '1';
+    var logEle = document.getElementById('log');
+    var log = function (str) {
+        if (debug === '1') {
+            var p = document.createElement('p');
+            p.appendChild(document.createTextNode(str));
+            logEle.appendChild(p);
+        }
+    };
+    var extractArgs = function (args) {
+        var temp = args.split('&');
+        var config = {};
+        for (var i = 0, len = temp.length; i < len; i = i + 1) {
+            var one = temp[i].split('=');
+            config[one[0]] = one[1];
+        }
+        return config;
+    };
+
+    var config = extractArgs(window.location.href.split('?')[1]);
+    if (!config['width']) {
+        log('error: need width argument');
+    } else {
+        debug = config['debug'] || '0';
+        log('note: in debug mode');
+
+        if (config['width'] === '0') {
+            config['width'] = String(Math.min(window.innerWidth,
+                    document.documentElement.clientWidth));
+        }
+    }
+    var captchaObj;
+    var init = function () {
+        captchaObj = new window.Geetest(config);
+        captchaObj.appendTo('#content');
+        captchaObj.onStatusChange(function (message, item) {
+            log('message: ' + message);
+            if (window.gtapp && window.gtapp.gtCallBack) {
+                try {
+                    var json_gt = JSON.stringify(captchaObj.getValidate())
+                    log('validate: ' + json_gt);
+                } catch (e) {
+                    log(e.name + ': ' + e.message);
+                }
+                if (message === 'Success') {
+                    window.gtapp.gtCallBack("1", json_gt, message)
+                } else {
+                    window.gtapp.gtCallBack("0", json_gt, message)
+                }
+            }
+        });
+    };
+</script>
 </body>
 </html>
