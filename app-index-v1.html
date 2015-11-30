@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+    <title>极验验证移动版</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #content canvas {
+            width:100%;
+        }
+        .wrapper {
+            width: 100%;
+        }
+
+        .wrapper .top {
+            background-color: #eeeeee;
+            padding: 0 8px;
+            height: 45px;
+            z-index: 1;
+            position: relative;
+            text-align: center;
+            border-bottom: 1px solid #a7a7aa;
+            font-weight: 500;
+        }
+
+        .wrapper .title {
+            line-height: 45px;
+        }
+
+        .exit {
+            background-image: url('img/return.png');
+            -moz-background-size: 12px auto;
+            -o-background-size: 12px auto;
+            -webkit-background-size: 12px auto;
+            background-size: 12px auto;
+            width: 12px;
+            height: 22px;
+            display: inline-block;
+            vertical-align: middle;
+            position: absolute;
+            left: 8px;
+            top: 11px;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+
+        .exit:active {
+            background-image: url('img/return_hover.png');
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="top">
+        <a class="exit" href="javascript:JSInterface.gtCloseWindow();"></a>
+        <span class="title">请通过验证</span>
+    </div>
+    <div class="body" id="content"></div>
+    <div id="log"></div>
+</div>
+<script>
+    var debug = false;
+    var args;
+    var logEle = document.getElementById("log");
+    var content = document.getElementById("content");
+
+    var parse = function (str) {
+
+        var args = {};
+        var items = str.split("&");
+
+        for (var i = 0, len = items.length; i < len; i = i + 1) {
+
+            var temp = items[i].split("=");
+            args[temp[0]] = temp[1];
+        }
+
+        return args;
+    };
+
+    var log = function (str) {
+        if (!debug) {
+            return;
+        }
+        var p = document.createElement("p");
+        p.appendChild(document.createTextNode(str));
+
+        logEle.appendChild(p);
+    };
+
+
+    var s = document.createElement("script");
+
+    s.async = true;
+
+    var width = document.documentElement.clientWidth;
+
+    var str = window.location.href.split("?")[1];
+
+    args = parse(str);
+
+    if (args["debug"] === "true") {
+
+        debug = true;
+
+        log(JSON.stringify(args));
+    }
+
+    s.src = "http://api.geetest.com/get.php?" + str + "&width=100%";
+
+    content.appendChild(s);
+
+    window.gt_custom_ajax = function (result, id, message) {
+
+        log(    "result: " + result +
+                "id: " + id +
+                "message: " + message);
+
+        if (window.JSInterface && window.JSInterface.gtCallBack) {
+
+            log("has JSInterface gtCallBack");
+
+            if (result) {
+
+                log("succeed");
+
+                try {
+                    var json_gt = JSON.stringify({
+                        geetest_challenge: document.querySelector('input[name=geetest_challenge]').value,
+                        geetest_validate: document.querySelector('input[name=geetest_validate]').value,
+                        geetest_seccode: document.querySelector('input[name=geetest_seccode]').value
+                    });
+
+                    log(json_gt);
+                }
+                catch (e) {
+
+                    log(e.name + ": " + e.message);
+                }
+
+                window.JSInterface.gtCallBack("1", json_gt, message)
+
+            } else {
+
+                window.JSInterface.gtCallBack("0", JSON.stringify({
+                    geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
+                }), message);
+            }
+        }
+    };
+
+</script>
+</body>
+</html>
