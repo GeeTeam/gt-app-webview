@@ -68,17 +68,6 @@
     </div>
     <div class="body" id="content">
         <script>
-            var downHandler = function () {
-                // 提醒app开始记录
-                window.startRecord();
-            };
-            var upHandler = function () {
-                // 记录完毕，获取app记录的轨迹
-                window.endRecordAndReturnTrack();
-            };
-            document.addEventListener('mousedown', downHandler);
-            document.addEventListener('mouseup', upHandler);
-
             var log = function (str) {
                 var s = document.createElement('div');
                 s.innerHTML = str + '<br/>';
@@ -92,11 +81,6 @@
             })();
             window.gt_custom_ajax = function (result, id, message) {
                 log("in ajax")
-
-                // 发送app记录的数据到服务器
-                post('http://geetest.com/track', track);
-
-
                 //log(result + id + message)
                 if (window.android && window.android.gtCallBack) {
                     //log("has android callback")
@@ -128,7 +112,7 @@
                     var vp = document.getElementById('viewport');
                     vp.setAttribute('content','width=260,user-scalable=no');
                 }
-            };
+            }
         </script>
     </div>
 </div>
