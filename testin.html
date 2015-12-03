@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>接口测试</title>
+    <style>
+        body {
+            font-family: 微软雅黑, 华文仿宋, sans-serif;
+            margin: 0;
+        }
+
+        p {
+            line-height: 32px;
+            font-size: 16px;
+        }
+
+        .interface,
+        .log {
+            display: inline-block;
+            margin: 5px;
+            border: 1px solid #080;
+            border-radius: 4px;
+            padding: 0 5px;
+            line-height: 20px;
+            color: #008;
+            font-size: 12px;
+            background-color: #BFB;
+            font-family: Consolas, monospace;
+            word-break: break-all;
+        }
+
+        .log {
+            border-color: #008;
+            color: #800;
+            background-color: #BBF;
+        }
+
+        .btn {
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .btn:active {
+            border-color: #BFB;
+        }
+
+        .title {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<p class="title">极验测试页面&nbsp;&nbsp;&nbsp;&nbsp;<span class="interface btn" id="refresh">刷新</span></p>
+<script>
+    var getWidth = function () {
+        return document.documentElement.clientWidth;
+    };
+
+    var ids = {
+        width: getWidth(),
+        pc: "afbb8bd039f7e06fa0ef1f65f7d2c467",
+        mobile: "576e5d2ec87db40179eead586cb999e7",
+        apiserver: "testcenter.geetest.com/server-test/",
+        staticservers: ["192.168.1.105/"]
+    };
+
+    var qs = function (str) {
+
+        return document.querySelector(str);
+    };
+
+    var append = function (parent, child) {
+        map(child, function (ele) {
+            parent.appendChild(ele);
+        });
+    };
+
+    var node = function (tag, className, text) {
+        var ele = document.createElement(tag);
+        if (className) {
+            ele.className = className;
+        }
+        if (text) {
+            ele.appendChild(textNode(text));
+        }
+        return ele;
+    };
+
+    var textNode = function (str) {
+        return document.createTextNode(str);
+    };
+
+    var log = function (box, str) {
+        var span = node("span", "log");
+        span.appendChild(document.createTextNode(str));
+        box.appendChild(span);
+    };
+
+    var addEvent = function (ele, type, cb) {
+        ele.addEventListener(type, cb);
+    };
+    var map = function (arr, cb) {
+        var result = [];
+
+        if (!Array.isArray(arr)) {
+            arr = [arr];
+        }
+        for (var i = 0, len = arr.length; i < len; i = i + 1) {
+            result[i] = cb(arr[i]);
+        }
+        return result;
+    };
+    var test0 = function (a, refreshEle, getValidateEle, logEle) {
+        var names = ["onFail", "onSuccess", "onRefresh", "onReady"];
+        map(names, function (name) {
+            a[name](function () {
+                log(logEle, name + "回调");
+            });
+        });
+
+        window.a = a;
+
+        addEvent(refreshEle, "click", function () {
+            a.refresh();
+        });
+
+        addEvent(getValidateEle, "click", function () {
+            log(logEle, JSON.stringify(a.getValidate()).replace(/\{|\}/g, ""));
+        });
+
+        addEvent(window, "resize", function () {
+            a.zoom(getWidth() + "px");
+        })
+
+    };
+
+    var test = function (gt, tyle, product) {
+
+        if (!product) {
+            product = "";
+        }
+
+        var box = node("div", "box");
+        var refresh = node("span", "interface btn", "refresh()");
+        var validate = node("span", "interface btn", "getValidate()");
+        var log = node("p");
+        var div = node("div");
+        append(log, [refresh, validate, node("br")]);
+        append(box, [div, log]);
+        append(document.body, box);
+
+        var a = new Geetest({
+            apiserver: ids.apiserver,
+            gt: gt,
+            product: product,
+            width: ids.width
+        });
+        a.appendTo(div);
+        test0(a, refresh, validate, log);
+    };
+
+    var cb = function () {
+
+//        test(ids.pc, "pc", "embed");
+
+        test(ids.mobile, "mobile");
+
+    };
+
+    addEvent(qs("#refresh"), "click", function () {
+        JSInterface.reload();
+    });
+
+    var script = node("script");
+    script.src = "http://" + ids.apiserver + "get.php?callback=cb";
+    append(document.body, script);
+</script>
+</body>
+</html>
