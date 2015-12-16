@@ -16,8 +16,9 @@
         }
 
         #content canvas {
-            width:100%;
+            width: 100%;
         }
+
         .wrapper {
             width: 100%;
         }
@@ -56,6 +57,14 @@
         .exit:active {
             background-image: url('img/return_hover.png');
         }
+
+        #log {
+            padding: 10px;
+        }
+        #log>p {
+            margin: 5px 0;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -65,7 +74,7 @@
         <span class="title">请通过验证</span>
     </div>
     <div class="body" id="content"></div>
-    <div id="log"></div>
+    <div id="log"> </div>
 </div>
 <script>
     var debug = false;
@@ -94,7 +103,7 @@
         var p = document.createElement("p");
         p.appendChild(document.createTextNode(str));
 
-        logEle.appendChild(p);
+        logEle.insertBefore(p, logEle.firstChild);
     };
 
 
@@ -108,22 +117,22 @@
 
     args = parse(str);
 
-    if (args["debug"] === "true") {
+    if (args["debug"] === "true" || args["debug"] === "1") {
 
         debug = true;
 
         log(JSON.stringify(args));
     }
 
-    s.src = "http://api.geetest.com/get.php?" + str + "&width=100%";
+    s.src = "http://api.geetest.com/get.php?" + str + (!args["width"] ? "&width=" + width : "");
 
     content.appendChild(s);
 
     window.gt_custom_ajax = function (result, id, message) {
 
-        log(    "result: " + result +
-                "id: " + id +
-                "message: " + message);
+        log("result: " + result);
+        log("id: " + id);
+        log("message: " + message);
 
         if (window.JSInterface && window.JSInterface.gtCallBack) {
 
@@ -147,7 +156,9 @@
                     log(e.name + ": " + e.message);
                 }
 
-                window.JSInterface.gtCallBack("1", json_gt, message)
+                setTimeout(function () {
+                    window.JSInterface.gtCallBack("1", json_gt, message)
+                }, 1500);
 
             } else {
 

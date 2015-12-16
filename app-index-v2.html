@@ -74,7 +74,7 @@
         <span class="title">请通过验证</span>
     </div>
     <div class="body" id="content"></div>
-    <div id="log"></div>
+    <div id="log"> </div>
 </div>
 <script src="http://api.geetest.com/get.php?callback=init"></script>
 <script>
@@ -104,14 +104,14 @@
         var p = document.createElement("p");
         p.appendChild(document.createTextNode(str));
 
-        logEle.appendChild(p);
+        logEle.insertBefore(p, logEle.firstChild);
     };
 
     var str = window.location.href.split('?')[1];
 
     args = parse(str);
 
-    if (args["debug"] === "true") {
+    if (args["debug"] === "true" || args["debug"] === "1") {
 
         debug = true;
 
@@ -120,13 +120,20 @@
 
     var init = function () {
 
-
-        var captchaObj = new window.Geetest({
+        var config = {
             gt: args["gt"],
-            challenge: args["challenge"],
             offline: args["offline"],
-            product: args["product"]
-        });
+            product: args["product"],
+            width: args["width"] || document.documentElement.clientWidth
+        };
+        if (args["challenge"]) {
+
+            config.challenge = args["challenge"];
+
+        }
+
+
+        var captchaObj = new window.Geetest(config);
 
         captchaObj.appendTo('#content');
 
@@ -143,7 +150,9 @@
                     log(e.name + ": " + e.message);
                 }
 
-                window.JSInterface.gtCallBack("1", json_gt, "Success");
+                setTimeout(function () {
+                    window.JSInterface.gtCallBack("1", json_gt, "Success");
+                }, 1500);
             }
         });
 
