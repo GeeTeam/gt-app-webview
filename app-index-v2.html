@@ -122,10 +122,11 @@
 
         var config = {
             gt: args["gt"],
-            offline: args["offline"],
+            offline: args["offline"] === "true",
             product: args["product"],
             width: args["width"] || document.documentElement.clientWidth
         };
+
         if (args["challenge"]) {
 
             config.challenge = args["challenge"];
