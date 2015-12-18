@@ -51,7 +51,7 @@
         height: 22px;
         display: inline-block;
         vertical-align: middle;
-        position: absolute;
+        position: fixed;
         left: 8px;
         top: 11px;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -76,6 +76,7 @@
     <div class="body" id="content"></div>
     <div id="log"> </div>
 </div>
+<input id="tpl-version" type="hidden" value="5.2.10">
 <script src="http://api.geetest.com/get.php?callback=init"></script>
 <script>
     var debug = false;
@@ -122,9 +123,10 @@
 
         var config = {
             gt: args["gt"],
-            offline: args["offline"] === "true",
+            offline: args["offline"] === "true" || args["success"] === "1",
             product: args["product"],
-            width: args["width"] || document.documentElement.clientWidth
+            width: args["width"] || document.documentElement.clientWidth,
+            mobile_info: args["mobile_info"]
         };
 
         if (args["challenge"]) {
