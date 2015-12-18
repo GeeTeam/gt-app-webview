@@ -60,10 +60,10 @@
     .exit:active {
         background-image: url('img/return_hover.png');
     }
-    #log {
+    .log {
         padding: 10px;
     }
-    #log>p {
+    .log>p {
         margin: 5px 0;
         word-break: break-all;
     }
@@ -74,7 +74,7 @@
         <span class="title">请通过验证</span>
     </div>
     <div class="body" id="content"></div>
-    <div id="log"> </div>
+    <div id="log"></div>
 </div>
 <input id="tpl-version" type="hidden" value="5.2.10">
 <script src="http://api.geetest.com/get.php?callback=init"></script>
@@ -108,13 +108,15 @@
         logEle.insertBefore(p, logEle.firstChild);
     };
 
-    var str = window.location.href.split('?')[1];
+    var str = location.href.split('?')[1];
 
     args = parse(str);
 
     if (args["debug"] === "true" || args["debug"] === "1") {
 
         debug = true;
+
+        logEle.className = "log";
 
         log(JSON.stringify(args));
     }
@@ -123,10 +125,11 @@
 
         var config = {
             gt: args["gt"],
+            // pandaTV 使用offline表示，标准使用success来表示
             offline: args["offline"] === "true" || args["success"] === "0",
             product: args["product"],
             width: args["width"] || document.documentElement.clientWidth,
-            mobile_info: args["mobile_info"]
+            mobileInfo: args["mobile_info"]
         };
 
         if (args["challenge"]) {
@@ -136,44 +139,31 @@
         }
 
 
-        var captchaObj = new window.Geetest(config);
+        var captchaObj = new Geetest(config);
 
         captchaObj.appendTo('#content');
 
         captchaObj.onSuccess(function () {
 
-            if (window.JSInterface && window.JSInterface.gtCallBack) {
-                try {
-                    var json_gt = JSON.stringify(captchaObj.getValidate());
+            var result = JSON.stringify(captchaObj.getValidate());
 
-                    log("validate: " + json_gt);
+            log("Success validate: " + result);
 
-                } catch (e) {
+            JSInterface.gtCallBack("1", result, "Success");
 
-                    log(e.name + ": " + e.message);
-                }
-
-                setTimeout(function () {
-                    window.JSInterface.gtCallBack("1", json_gt, "Success");
-                }, 1500);
-            }
         });
 
         captchaObj.onFail(function () {
-            if (window.JSInterface && window.JSInterface.gtCallBack) {
-                try {
-                    var json_gt = JSON.stringify({
-                        geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
-                    });
 
-                    log("validate: " + json_gt);
+            var result = JSON.stringify({
+                geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
+            });
 
-                } catch (e) {
+            log("Fail challenge: " + result);
 
-                    log(e.name + ": " + e.message);
-                }
-                window.JSInterface.gtCallBack("0", json_gt, "Fail");
-            }
+
+            JSInterface.gtCallBack("0", result, "Fail");
+
         });
     };
 </script>
