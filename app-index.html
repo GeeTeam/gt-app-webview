@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+    <title>极验验证移动版</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .log {
+            padding: 10px;
+        }
+        .log>p {
+            margin: 5px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+<div class="body" id="content"></div>
+<div id="log"></div>
+<input id="tpl-version" type="hidden" value="5.2.10">
+<script>
+    var debug = false;
+    var args;
+    var logEle = document.getElementById("log");
+    var content = document.getElementById("content");
+
+    var parse = function (str) {
+
+        var args = {};
+        var items = str.split("&");
+
+        for (var i = 0, len = items.length; i < len; i = i + 1) {
+
+            var temp = items[i].split("=");
+            args[temp[0]] = temp[1];
+        }
+
+        return args;
+    };
+
+    var log = function (str) {
+        if (!debug) {
+            return;
+        }
+        var p = document.createElement("p");
+        p.appendChild(document.createTextNode(str));
+
+        logEle.insertBefore(p, logEle.firstChild);
+    };
+
+    var str = location.href.split('?')[1];
+
+    args = parse(str);
+
+    if (args["debug"] === "true" || args["debug"] === "1") {
+
+        debug = true;
+
+        logEle.className = "log";
+
+        log(JSON.stringify(args));
+    }
+
+    var init = function () {
+
+        var config = {
+            gt: args["gt"],
+            // pandaTV 使用offline表示，标准使用success来表示
+            offline: args["offline"] === "true" || args["success"] === "0",
+            product: args["product"],
+            width: args["width"] || document.documentElement.clientWidth,
+            mobileInfo: args["mobile_info"],
+            lang: args["lang"] || "zh",
+            https: location.protocol === "https:"
+        };
+
+        if (args["challenge"]) {
+
+            config.challenge = args["challenge"];
+
+        }
+
+
+        var captchaObj = new Geetest(config);
+
+        captchaObj.appendTo('#content');
+
+        captchaObj.onSuccess(function () {
+
+            var result = JSON.stringify(captchaObj.getValidate());
+
+            log("Success validate: " + result);
+
+            JSInterface.gtCallBack("1", result, "Success");
+
+        });
+
+        captchaObj.onFail(function () {
+
+            var result = JSON.stringify({
+                geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
+            });
+
+            log("Fail challenge: " + result);
+
+
+            JSInterface.gtCallBack("0", result, "Fail");
+
+        });
+    };
+</script>
+<script src="//api.geetest.com/get.php?callback=init"></script>
+</body>
+</html>
