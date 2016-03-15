@@ -89,7 +89,6 @@
 
         }
 
-
         var captchaObj = new Geetest(config);
 
         captchaObj.appendTo('#content');
@@ -100,8 +99,25 @@
 
             log("Success validate: " + result);
 
-            JSInterface.gtCallBack("1", result, "Success");
-
+            try {
+                if (JSInterface) {
+                    JSInterface.gtCallBack("1", result, "Success");
+                }
+            } catch (e) {
+                log(e.name + ": " + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers) {
+                    message = JSON.stringify({
+                        code: "1",
+                        result: result,
+                        message: "Success"
+                    });
+                    window.webkit.messageHandlers.wkWebview.postMessage(message);
+                }
+            } catch (e) {
+                log(e.name + ": " + e.message);
+            }
         });
 
         captchaObj.onFail(function () {
@@ -109,11 +125,25 @@
             var result = JSON.stringify({
                 geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
             });
-
-            log("Fail challenge: " + result);
-
-
-            JSInterface.gtCallBack("0", result, "Fail");
+            try {
+                if (JSInterface) {
+                    JSInterface.gtCallBack("0", result, "Fail");
+                }
+            }catch (e) {
+                log(e.name + ": " + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers) {
+                    message = JSON.stringify({
+                        code : "0",
+                        result : result,
+                        message : "Fail"
+                    });
+                    window.webkit.messageHandlers.wkWebview.postMessage(message);
+                }
+            }catch (e){
+                log(e.name + ": " + e.message);
+            }
 
         });
     };
