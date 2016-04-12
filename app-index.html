@@ -109,6 +109,7 @@
             try {
                 if (window.webkit && window.webkit.messageHandlers) {
                     message = JSON.stringify({
+                        ready: "1"
                         code: "1",
                         result: result,
                         message: "Success"
@@ -135,6 +136,7 @@
             try {
                 if (window.webkit && window.webkit.messageHandlers) {
                     message = JSON.stringify({
+                        ready: "1"
                         code : "0",
                         result : result,
                         message : "Fail"
