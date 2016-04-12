@@ -109,10 +109,9 @@
             try {
                 if (window.webkit && window.webkit.messageHandlers) {
                     message = JSON.stringify({
-                        ready: "1"
-                        code: "1",
-                        result: result,
-                        message: "Success"
+                        code : "1",
+                        result : result,
+                        message : "Success"
                     });
                     window.webkit.messageHandlers.wkWebview.postMessage(message);
                 }
@@ -136,7 +135,6 @@
             try {
                 if (window.webkit && window.webkit.messageHandlers) {
                     message = JSON.stringify({
-                        ready: "1"
                         code : "0",
                         result : result,
                         message : "Fail"
@@ -146,6 +144,7 @@
             }catch (e){
                 log(e.name + ": " + e.message);
             }
+
         });
 
         captchaObj.onReady(function () {
@@ -158,20 +157,16 @@
                 log(e.name + ": " + e.message);
             }
             try {
-                if (window.webkit && window.webkit.messageHandlers) {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gtReady) {
                     message = JSON.stringify({
-                        ready: "0",
-                        code : "0",
-                        result: "0",
-                        message: "ready"
+                        ready : "0"
                     });
-                    window.webkit.messageHandlers.wkWebview.postMessage(message);
+                    window.webkit.messageHandlers.gtReady.postMessage(message);
                 }
             }catch (e){
                 log(e.name + ": " + e.message);
             }
         });
-        
     };
 </script>
 <script src="//api.geetest.com/get.php?callback=init"></script>
