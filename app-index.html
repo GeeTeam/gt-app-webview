@@ -144,8 +144,32 @@
             }catch (e){
                 log(e.name + ": " + e.message);
             }
-
         });
+
+        captchaObj.onReady(function () {
+            log('Ready');
+            try {
+                if (JSInterface) {
+                    JSInterface.gtReady();
+                }
+            }catch (e) {
+                log(e.name + ": " + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers) {
+                    message = JSON.stringify({
+                        ready: "0",
+                        code : "0",
+                        result: "0",
+                        message: "ready"
+                    });
+                    window.webkit.messageHandlers.wkWebview.postMessage(message);
+                }
+            }catch (e){
+                log(e.name + ": " + e.message);
+            }
+        });
+        
     };
 </script>
 <script src="//api.geetest.com/get.php?callback=init"></script>
