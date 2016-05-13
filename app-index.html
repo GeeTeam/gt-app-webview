@@ -14,12 +14,22 @@
             padding: 0;
             width: 100%;
         }
+
         .log {
             padding: 10px;
         }
-        .log>p {
+
+        .log > p {
             margin: 5px 0;
             word-break: break-all;
+        }
+
+        .title {
+            padding: 0 10px;
+            margin: 3.5% 0;
+            font: 16px normal;
+            font-family: "Open Sans", Arial, "Hiragino Sans GB", "Microsoft YaHei", "STHeiti", "WenQuanYi Micro Hei", SimSun, sans-serif !important;
+            color: rgb(74, 90, 106);
         }
     </style>
 </head>
@@ -60,6 +70,13 @@
     var str = location.href.split('?')[1];
 
     args = parse(str);
+
+    if (args['title']) {
+        var h3 = document.createElement('h3');
+        h3.className = 'title';
+        h3.appendChild(document.createTextNode(decodeURIComponent(args['title'])));
+        content.appendChild(h3);
+    }
 
     if (args["debug"] === "true" || args["debug"] === "1") {
 
@@ -109,9 +126,9 @@
             try {
                 if (window.webkit && window.webkit.messageHandlers) {
                     message = JSON.stringify({
-                        code : "1",
-                        result : result,
-                        message : "Success"
+                        code: "1",
+                        result: result,
+                        message: "Success"
                     });
                     window.webkit.messageHandlers.wkWebview.postMessage(message);
                 }
@@ -129,19 +146,19 @@
                 if (JSInterface) {
                     JSInterface.gtCallBack("0", result, "Fail");
                 }
-            }catch (e) {
+            } catch (e) {
                 log(e.name + ": " + e.message);
             }
             try {
                 if (window.webkit && window.webkit.messageHandlers) {
                     message = JSON.stringify({
-                        code : "0",
-                        result : result,
-                        message : "Fail"
+                        code: "0",
+                        result: result,
+                        message: "Fail"
                     });
                     window.webkit.messageHandlers.wkWebview.postMessage(message);
                 }
-            }catch (e){
+            } catch (e) {
                 log(e.name + ": " + e.message);
             }
 
@@ -153,17 +170,17 @@
                 if (JSInterface) {
                     JSInterface.gtReady();
                 }
-            }catch (e) {
+            } catch (e) {
                 log(e.name + ": " + e.message);
             }
             try {
                 if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gtReady) {
                     message = JSON.stringify({
-                        ready : "0"
+                        ready: "0"
                     });
                     window.webkit.messageHandlers.gtReady.postMessage(message);
                 }
-            }catch (e){
+            } catch (e) {
                 log(e.name + ": " + e.message);
             }
         });
