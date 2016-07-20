@@ -165,6 +165,7 @@
         });
 
         captchaObj.onReady(function () {
+            log('load time: ' + ((new Date()).getTime() - (window.startTime || 0)));
             log('Ready');
             try {
                 if (JSInterface) {
@@ -185,6 +186,10 @@
             }
         });
     };
+
+    if (debug) {
+        window.startTime = (new Date()).getTime();
+    }
 </script>
 <script src="//api.geetest.com/get.php?callback=init"></script>
 </body>
