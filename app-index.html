@@ -93,7 +93,7 @@
             gt: args["gt"],
             // pandaTV 使用offline表示，标准使用success来表示
             offline: args["offline"] === "true" || args["success"] === "0",
-            product: args["product"],
+            product: args["product"] || "embed",//移动样式默认embed
             width: args["width"] || document.documentElement.clientWidth,
             mobileInfo: args["mobile_info"],
             lang: args["lang"] || "zh",
