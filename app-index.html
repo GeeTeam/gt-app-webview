@@ -185,6 +185,27 @@
                 log(e.name + ": " + e.message);
             }
         });
+
+        captchaObj.onError(function () {
+            log('Error Ocurred.');
+            try {
+                if (JSInterface) {
+                    JSInterface.gtError();
+                }
+            } catch (e) {
+                log(e.name + ": " + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gtError) {
+                    message = JSON.stringify({
+                        error: "1"
+                    });
+                    window.webkit.messageHandlers.gtError.postMessage(message);
+                }
+            } catch (e) {
+                log(e.name + ": " + e.message);
+            }
+        });
     };
 
     if (debug) {
