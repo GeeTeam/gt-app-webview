@@ -36,7 +36,8 @@
 <body>
 <div class="body" id="content"></div>
 <div id="log"></div>
-<input id="tpl-version" type="hidden" value="5.2.10">
+<input id="tpl-version" type="hidden" value="2016-11-25">
+<script src="//static.geetest.com/static/tools/gt.js"></script>
 <script>
     var debug = false;
     var args;
@@ -87,26 +88,25 @@
         log(JSON.stringify(args));
     }
 
-    var init = function () {
+    var config = {
+        gt: args["gt"],
+        // pandaTV 使用offline表示，标准使用success来表示
+        offline: args["offline"] === "true" || args["success"] === "0",
+        product: args["product"] || "embed",//移动样式默认embed
+        width: args["width"] || document.documentElement.clientWidth,
+        mobileInfo: args["mobile_info"],
+        lang: args["lang"] || "zh",
+        https: location.protocol === "https:"
+    };
+    if (args["challenge"]) {
+        config.challenge = args["challenge"];
+    }
+    if (args["api_server"]) {
+        config.api_server = args["api_server"];
+        config.apiserver = args["api_server"];
+    }
 
-        var config = {
-            gt: args["gt"],
-            // pandaTV 使用offline表示，标准使用success来表示
-            offline: args["offline"] === "true" || args["success"] === "0",
-            product: args["product"] || "embed",//移动样式默认embed
-            width: args["width"] || document.documentElement.clientWidth,
-            mobileInfo: args["mobile_info"],
-            lang: args["lang"] || "zh",
-            https: location.protocol === "https:"
-        };
-
-        if (args["challenge"]) {
-
-            config.challenge = args["challenge"];
-
-        }
-
-        var captchaObj = new Geetest(config);
+    initGeetest(config, function (captchaObj) {
 
         captchaObj.appendTo('#content');
 
@@ -206,12 +206,11 @@
                 log(e.name + ": " + e.message);
             }
         });
-    };
+    });
 
     if (debug) {
         window.startTime = (new Date()).getTime();
     }
 </script>
-<script src="//api.geetest.com/get.php?callback=init"></script>
 </body>
 </html>
