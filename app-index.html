@@ -40,7 +40,6 @@
 <script src="//static.geetest.com/static/tools/gt.js"></script>
 <script>
     var debug = false;
-    var args;
     var logEle = document.getElementById("log");
     var content = document.getElementById("content");
 
@@ -70,7 +69,7 @@
 
     var str = location.href.split('?')[1];
 
-    args = parse(str);
+    var args = parse(str);
 
     if (args['title'] && args['title'] != "") {
         var h3 = document.createElement('h3');
@@ -89,22 +88,52 @@
     }
 
     var config = {
-        gt: args["gt"],
-        // pandaTV 使用offline表示，标准使用success来表示
-        offline: args["offline"] === "true" || args["success"] === "0",
-        product: args["product"] || "embed",//移动样式默认embed
-        width: args["width"] || document.documentElement.clientWidth,
-        mobileInfo: args["mobile_info"],
-        lang: args["lang"] || "zh",
+        product: "embed",// 移动样式默认embed
+        width: document.documentElement.clientWidth,
         https: location.protocol === "https:"
     };
-    if (args["challenge"]) {
-        config.challenge = args["challenge"];
+
+    for (var k in args) {
+        if (args.hasOwnProperty(k) &&
+                ['debug', 'title'].indexOf(k) === -1) {
+            var v = args[k];
+            if (k === 'api_server') {
+                config.api_server = v;
+                config.apiserver = v;
+            } else if (k === 'success') {
+                // pandaTV 使用offline表示，标准使用success来表示
+                config.offline = v === '0';
+            } else if (k === 'callback_delay') {
+                // 验证码内部只接受number类型
+                config.callback_delay = +v;
+            } else {
+                config[k] = v;
+            }
+        }
     }
-    if (args["api_server"]) {
-        config.api_server = args["api_server"];
-        config.apiserver = args["api_server"];
-    }
+
+    var errorHandler = function () {
+        log('Error Ocurred.');
+        try {
+            if (JSInterface) {
+                JSInterface.gtError();
+            }
+        } catch (e) {
+            log(e.name + ": " + e.message);
+        }
+        try {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gtError) {
+                var message = JSON.stringify({
+                    error: "1"
+                });
+                window.webkit.messageHandlers.gtError.postMessage(message);
+            }
+        } catch (e) {
+            log(e.name + ": " + e.message);
+        }
+    };
+
+    config.onError = errorHandler;
 
     initGeetest(config, function (captchaObj) {
 
@@ -186,26 +215,7 @@
             }
         });
 
-        captchaObj.onError(function () {
-            log('Error Ocurred.');
-            try {
-                if (JSInterface) {
-                    JSInterface.gtError();
-                }
-            } catch (e) {
-                log(e.name + ": " + e.message);
-            }
-            try {
-                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gtError) {
-                    message = JSON.stringify({
-                        error: "1"
-                    });
-                    window.webkit.messageHandlers.gtError.postMessage(message);
-                }
-            } catch (e) {
-                log(e.name + ": " + e.message);
-            }
-        });
+        captchaObj.onError(errorHandler);
     });
 
     if (debug) {
