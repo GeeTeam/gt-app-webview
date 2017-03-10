@@ -1,0 +1,277 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>请通过以下验证</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        .title {
+            margin: 15px;
+            font-size: 18px;
+            line-height: 18px;
+            height: 18px;
+        }
+        #log {
+            margin: 10px;
+            display: none;
+            word-break: break-all;
+        }
+
+        #log.log {
+            display: block;
+        }
+
+        #log p {
+        }
+    </style>
+</head>
+<body>
+<div id="captcha"></div>
+<div id="log"></div>
+<script>
+    var debug = false;
+    var setDebug = function () {
+        debug = true;
+        logEle.className = 'log';
+    };
+    var log = function (str) {
+        if (!debug) {
+            return;
+        }
+        var p = document.createElement('p');
+        p.appendChild(document.createTextNode(str));
+        logEle.insertBefore(p, logEle.firstChild);
+    };
+    var captcha = document.getElementById('captcha');
+    var logEle = document.getElementById('log');
+    var head = document.getElementsByTagName('head')[0];
+    var query = location.href.split('?')[1];
+
+    if (!query) {
+        setDebug();
+        log('no query: ' + location.href);
+    }
+
+    var parse = function (str) {
+        var args = {};
+        var items = str.split('&');
+        for (var i = 0, len = items.length; i < len; i = i + 1) {
+            var temp = items[i].split('=');
+            args[temp[0]] = temp[1];
+        }
+        return args;
+    };
+
+
+    var args = parse(query);
+
+    if (args['title'] && args['title'] != "") {
+        var h3 = document.createElement('h3');
+        h3.className = 'title';
+        h3.appendChild(document.createTextNode(decodeURIComponent(args['title'])));
+        captcha.appendChild(h3);
+    }
+
+    if (!args['gt']
+        || !args['challenge']
+        || !args['type']
+        || !args[args['type']]) {
+        setDebug(true);
+        log('args error: ' + query);
+    }
+
+    if (args['debug'] === 'true'
+        || args['debug'] === '1') {
+        setDebug(true);
+        log(JSON.stringify(args));
+    }
+    if (debug) {
+        window.startTime = (new Date()).getTime();
+    }
+
+    var config = {
+        is_next: true,
+        mobile: true,
+        product: 'embed',
+        width: '100%',
+        https: location.protocol === 'https:'
+    };
+
+    for (var k in args) {
+        if (args.hasOwnProperty(k) &&
+            ['debug', 'title', 'static_servers', args['type']].indexOf(k) === -1) {
+            config[k] = args[k];
+        }
+    }
+
+    var js = args[args['type']];
+
+    var static_servers = ['static.geetest.com', 'dn-staticdown.qbox.me'];
+    if (args['static_servers']) {
+        static_servers = args['static_servers'].replace(/ /g, '').split(',');
+    }
+
+    var errorHandler = function () {
+        log('Error Ocurred.');
+        try {
+            if (JSInterface) {
+                JSInterface.gtError();
+            }
+        } catch (e) {
+            log(e.name + ': ' + e.message);
+        }
+        try {
+            if (window.webkit
+                && window.webkit.messageHandlers
+                && window.webkit.messageHandlers.gtError) {
+                var message = JSON.stringify({
+                    error: '1'
+                });
+                window.webkit.messageHandlers.gtError.postMessage(message);
+            }
+        } catch (e) {
+            log(e.name + ': ' + e.message);
+        }
+    };
+
+    config.onError = errorHandler;
+
+    var handler = function (config) {
+        var captchaObj = new Geetest(config);
+
+        captchaObj.appendTo(captcha);
+
+        captchaObj.onSuccess(function () {
+            var result = JSON.stringify(captchaObj.getValidate());
+            log('Success validate: ' + result);
+            try {
+                if (JSInterface) {
+                    JSInterface.gtCallBack('1', result, 'Success');
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers) {
+                    message = JSON.stringify({
+                        code: '1',
+                        result: result,
+                        message: 'Success'
+                    });
+                    window.webkit.messageHandlers.wkWebview.postMessage(message);
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+        });
+        captchaObj.onFail(function () {
+            var result = JSON.stringify({
+                geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
+            });
+            try {
+                if (JSInterface) {
+                    JSInterface.gtCallBack('0', result, 'Fail');
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers) {
+                    message = JSON.stringify({
+                        code: '0',
+                        result: result,
+                        message: 'Fail'
+                    });
+                    window.webkit.messageHandlers.wkWebview.postMessage(message);
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+        });
+        captchaObj.onReady(function () {
+            log('load time: ' + ((new Date()).getTime() - (window.startTime || 0)));
+            log('Ready');
+            try {
+                if (JSInterface) {
+                    JSInterface.gtReady();
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gtReady) {
+                    message = JSON.stringify({
+                        ready: '0'
+                    });
+                    window.webkit.messageHandlers.gtReady.postMessage(message);
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+        });
+        captchaObj.onClose(function () {
+            log('Close');
+            try {
+                if (JSInterface) {
+                    JSInterface.gtClose();
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+            try {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gtClose) {
+                    window.webkit.messageHandlers.gtClose.postMessage(1);
+                }
+            } catch (e) {
+                log(e.name + ': ' + e.message);
+            }
+        });
+        captchaObj.onError(errorHandler);
+    };
+
+    var loadJS = function (servers, path, test, callback) {
+        if (servers.length <= 0) {
+            callback(true);
+            return;
+        }
+        var s = document.createElement('script');
+        var loaded = false;
+        s.onload = s.onreadystatechange = function () {
+            if (!loaded &&
+                (!s.readyState
+                || s.readyState === "loaded"
+                || s.readyState === 'complete')) {
+                loaded = true;
+                if (test()) {
+                    callback(null);
+                } else {
+                    loadJS(servers.slice(1), path, test, callback);
+                    head.removeChild(s);
+                }
+            }
+        };
+        s.onerror = function () {
+            loadJS(servers.slice(1), path, test, callback);
+            head.removeChild(s);
+        };
+        s.src = '//' + servers[0] + path;
+        head.appendChild(s);
+    };
+
+    loadJS(static_servers, js, function () {
+        return window.Geetest;
+    }, function (err) {
+        if (err) {
+            log('load js err: static_servers=' + static_servers[0] + '&js=' + js);
+            return;
+        }
+        handler(config);
+    });
+</script>
+</body>
+</html>
