@@ -142,7 +142,10 @@
     config.onError = errorHandler;
 
     var handler = function (config) {
-        var captchaObj = new Geetest(config);
+        if (config.type === 'slide') {
+            config.type = 'slide3';
+        }
+        var captchaObj = new window.Geetest(config);
 
         captchaObj.appendTo(captcha);
 
@@ -234,6 +237,19 @@
         captchaObj.onError(errorHandler);
     };
 
+    var normalizeDomain = function (domain) {
+        // return domain.replace(/^https?:\/\/|\/.*$/g, '');
+        // 将限制降弱些，注意中山大学的域名：uems.sysu.edu.cn/jwxt/geetest/
+        return domain.replace(/^https?:\/\/|\/$/g, '');
+    };
+    var normalizePath = function (path) {
+        path = path.replace(/\/+/g, '/');
+        if (path.indexOf('/') !== 0) {
+            path = '/' + path;
+        }
+        return path;
+    };
+
     var loadJS = function (servers, path, test, callback) {
         if (servers.length <= 0) {
             callback(true);
@@ -259,7 +275,7 @@
             loadJS(servers.slice(1), path, test, callback);
             head.removeChild(s);
         };
-        s.src = '//' + servers[0] + path;
+        s.src = '//' + normalizeDomain(servers[0]) + normalizePath(path);
         head.appendChild(s);
     };
 
@@ -268,6 +284,7 @@
     }, function (err) {
         if (err) {
             log('load js err: static_servers=' + static_servers[0] + '&js=' + js);
+            errorHandler();
             return;
         }
         handler(config);
