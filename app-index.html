@@ -135,6 +135,12 @@
 
     config.onError = errorHandler;
 
+    if (typeof initGeetest === 'undefined') {
+        log('gt.js load fail, initGeetest is undefined.')
+        errorHandler();
+        return;
+    }
+
     initGeetest(config, function (captchaObj) {
 
         captchaObj.appendTo('#content');
