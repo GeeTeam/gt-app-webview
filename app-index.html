@@ -137,8 +137,7 @@
 
     if (typeof initGeetest === 'undefined') {
         log('gt.js load fail, initGeetest is undefined.')
-        errorHandler();
-        return;
+        errorHandler();        
     }
 
     initGeetest(config, function (captchaObj) {
