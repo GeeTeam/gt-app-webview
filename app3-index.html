@@ -116,11 +116,11 @@
         static_servers = args['static_servers'].replace(/ /g, '').split(',');
     }
 
-    var errorHandler = function () {
+    var errorHandler = function (err) {
         log('Error Ocurred.');
         try {
             if (JSInterface) {
-                JSInterface.gtError();
+                JSInterface.gtError(JSON.stringify(err));
             }
         } catch (e) {
             log(e.name + ': ' + e.message);
@@ -129,9 +129,9 @@
             if (window.webkit
                 && window.webkit.messageHandlers
                 && window.webkit.messageHandlers.gtError) {
-                var message = JSON.stringify({
-                    error: '1'
-                });
+                err = err || {};
+                err.error = '1';
+                var message = JSON.stringify(err);
                 window.webkit.messageHandlers.gtError.postMessage(message);
             }
         } catch (e) {
