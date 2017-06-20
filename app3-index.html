@@ -119,20 +119,29 @@
     var errorHandler = function (err) {
         log('Error Ocurred.');
         try {
-            if (JSInterface) {
-                JSInterface.gtError(JSON.stringify(err));
+            if (typeof JSInterface !== 'undefined') {
+            	if (typeof JSInterface.gtError === 'function') {
+                	JSInterface.gtError();
+            	}
+	            if (typeof JSInterface.gt3Error === 'function') {
+	            	JSInterface.gt3Error(JSON.stringify(err))
+	            }
             }
         } catch (e) {
             log(e.name + ': ' + e.message);
         }
         try {
             if (window.webkit
-                && window.webkit.messageHandlers
-                && window.webkit.messageHandlers.gtError) {
-                err = err || {};
-                err.error = '1';
-                var message = JSON.stringify(err);
-                window.webkit.messageHandlers.gtError.postMessage(message);
+                && window.webkit.messageHandlers) {
+            	err = err || {};
+	            err.error = '1';
+	            var message = JSON.stringify(err);
+            	if (window.webkit.messageHandlers.gtError) {
+	                window.webkit.messageHandlers.gtError.postMessage(message);
+            	}
+                if (window.webkit.messageHandlers.gt3Error) {
+	                window.webkit.messageHandlers.gt3Error.postMessage(message);
+                }
             }
         } catch (e) {
             log(e.name + ': ' + e.message);
