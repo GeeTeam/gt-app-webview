@@ -271,8 +271,8 @@
                 (!s.readyState
                 || s.readyState === "loaded"
                 || s.readyState === 'complete')) {
-                loaded = true;
                 if (test()) {
+                    loaded = true;
                     callback(null);
                 } else {
                     loadJS(servers.slice(1), path, test, callback);
