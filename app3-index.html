@@ -183,7 +183,7 @@
         });
         captchaObj.onFail(function () {
             var result = JSON.stringify({
-                geetest_challenge: document.querySelector('input[name=geetest_challenge]').value
+                geetest_challenge: ""
             });
             try {
                 if (JSInterface) {
